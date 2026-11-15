@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Invitations</title>
+<meta name="theme-color" content="#1c2a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Invitations">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --fg: #1c2230; --muted: #5d6677; --line: #dde1e8;
+  --brand: #1c2a44; --err: #b3261e;
+  --a1: #2f6fb3; --a2: #8a5a1f; --a3: #2e7d5b;
+  --a1-soft: #e3edf8; --a2-soft: #f4ebdd; --a3-soft: #e0f1e9;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #12151c; --surface: #1b1f29; --fg: #e8eaf0; --muted: #9aa2b2; --line: #2c3240;
+  --brand: #c9d6ee; --err: #f2b8b5;
+  --a1: #7fb2ea; --a2: #e0b06f; --a3: #74c9a1;
+  --a1-soft: #1e2d40; --a2-soft: #3a2d1b; --a3-soft: #1b3428;
+  color-scheme: dark;
+} }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.45;
+  padding-top: max(20px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(40px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: 1.9rem; margin: 0 0 4px; color: var(--brand); text-wrap: balance; }
+header p { margin: 0; color: var(--muted); }
+.status { font-size: 0.88rem; color: var(--muted); min-height: 1.3em; margin-top: 8px; }
+.status.err { color: var(--err); }
+
+.btn {
+  font: inherit; font-size: 0.92rem; padding: 9px 14px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+.btn.primary { background: var(--brand); color: var(--bg); border-color: var(--brand); font-weight: 600; }
+.btn:focus-visible, .choice:focus-visible, textarea:focus-visible { outline: 2px solid var(--a1); outline-offset: 2px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tally { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+.tile .n { font-family: var(--serif); font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1; }
+.tile .l { font-size: 0.84rem; color: var(--muted); margin-top: 6px; }
+.tile .who { font-size: 0.82rem; margin-top: 8px; }
+.tile.i1 .n { color: var(--a1); } .tile.i2 .n { color: var(--a2); } .tile.i3 .n { color: var(--a3); }
+
+section h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 8px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.roster { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 11px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.name { font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.name small { display: block; font-weight: 400; color: var(--muted); font-size: 0.78rem; }
+.choices { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.choice {
+  font: inherit; font-size: 0.85rem; padding: 7px 11px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--muted);
+}
+.choice[aria-pressed="true"].i1 { background: var(--a1-soft); color: var(--a1); border-color: var(--a1); font-weight: 600; }
+.choice[aria-pressed="true"].i2 { background: var(--a2-soft); color: var(--a2); border-color: var(--a2); font-weight: 600; }
+.choice[aria-pressed="true"].i3 { background: var(--a3-soft); color: var(--a3); border-color: var(--a3); font-weight: 600; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.panel h2 { font-size: 1.05rem; margin: 0; text-transform: none; letter-spacing: 0; color: var(--fg); }
+.panel p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+textarea {
+  width: 100%; min-height: 220px; font: inherit; font-size: 0.95rem; padding: 10px 12px;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); resize: vertical;
+}
+code { font-size: 0.88em; background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+footer { font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 600px) {
+  .row { grid-template-columns: 1fr; gap: 8px; }
+  .choices { justify-content: flex-start; }
+  .tally { grid-template-columns: 1fr; }
+  .tile { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; }
+  .tile .l { margin-top: 0; } .tile .who { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: no-preference) { .choice { transition: background .15s, color .15s, border-color .15s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Young Men Invitations</h1>
+    <p id="intro">Each young man picks one invitation. Tap a choice to save it; tap it again to clear it.</p>
+    <div class="status" id="status" role="status"></div>
+  </header>
+
+  <!-- Main view -->
+  <div id="main" hidden>
+    <div class="wrap" style="padding:0">
+      <div class="tally" id="tally"></div>
+      <div id="groups" class="wrap" style="padding:0"></div>
+      <div class="toolbar">
+        <button class="btn primary" id="copyBtn" type="button">Copy summary</button>
+        <button class="btn" id="editBtn" type="button">Edit names</button>
+        <button class="btn" id="restoreBtn" type="button">Restore from backup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Names setup / edit -->
+  <div id="setup" class="panel" hidden>
+    <h2 id="setupTitle">Add the names</h2>
+    <p>Paste or type one name per line. A line like <code>Deacons</code> or <code>Teachers:</code> starts a group. You can paste the name column straight from the spreadsheet; “Last, First” is turned into “First Last”.</p>
+    <p>Names are saved only on this device.</p>
+    <textarea id="namesInput" spellcheck="false" autocapitalize="words" placeholder="Deacons&#10;Last, First&#10;Last, First&#10;&#10;Teachers&#10;Last, First"></textarea>
+    <div class="toolbar">
+      <button class="btn primary" id="saveNames" type="button">Save names</button>
+      <button class="btn" id="cancelNames" type="button" hidden>Cancel</button>
+    </div>
+  </div>
+
+  <!-- Restore -->
+  <div id="restore" class="panel" hidden>
+    <h2>Restore from backup</h2>
+    <p>Paste a summary you copied earlier with “Copy summary”. This replaces the names and choices on this device.</p>
+    <textarea id="restoreInput" spellcheck="false"></textarea>
+    <div class="toolbar">
+      <button class="btn primary" id="doRestore" type="button">Restore</button>
+      <button class="btn" id="cancelRestore" type="button">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Copy fallback -->
+  <div id="copyPanel" class="panel" hidden>
+    <h2>Summary</h2>
+    <p>Select all of this text and copy it into Notes or a message.</p>
+    <textarea id="copyText" readonly></textarea>
+    <div class="toolbar"><button class="btn" id="closeCopy" type="button">Done</button></div>
+  </div>
+
+  <footer>
+    <span>Everything is stored only in this browser on this device. Nothing is sent anywhere.</span>
+    <span>Tip: use “Copy summary” now and then and keep it in Notes as a backup.</span>
+  </footer>
+</div>
+
+<script>
+const KEY = "ym-invitations-v1";
+const INVITES = [
+  { id: "learning",  label: "Always be learning",     cls: "i1" },
+  { id: "spiritual", label: "Learn spiritual truths", cls: "i2" },
+  { id: "integrity", label: "Live with integrity",    cls: "i3" },
+];
+const $ = id => document.getElementById(id);
+const slug = s => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+// state: { groups: [{name, people: [string]}], choices: {slug: {invitation, updatedAt}} }
+let state = { groups: [], choices: {} };
+let storageOk = true;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && Array.isArray(s.groups)) state = { groups: s.groups, choices: s.choices || {} };
+    }
+  } catch { storageOk = false; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); return true; }
+  catch { storageOk = false; setStatus("This browser won't let the page save. Private browsing may be on.", true); return false; }
+}
+function setStatus(t, err) { $("status").textContent = t; $("status").classList.toggle("err", !!err); }
+function allPeople() { return state.groups.flatMap(g => g.people); }
+function fmt(ts) { try { return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch { return ""; } }
+
+// ---------- Name parsing ----------
+const GROUP_WORDS = /^(deacons?|teachers?|priests?|young men|group\b.*)$/i;
+function cleanName(line) {
+  let s = line.split("\t")[0].trim();           // first spreadsheet column only
+  s = s.replace(/^[-*•\d.)\s]+/, "").trim();    // list bullets / numbers
+  if (!s) return "";
+  if (s.includes(",")) {                        // "Last, First Middle" -> "First Last"
+    const [last, rest] = s.split(",", 2).map(x => x.trim());
+    const first = (rest || "").split(/\s+/)[0];
+    s = first ? `${first} ${last}` : last;
+  }
+  return s.replace(/\s+/g, " ");
+}
+function parseNames(text) {
+  const groups = [];
+  let cur = null;
+  for (const raw of text.split(/\r?\n/)) {
+    const first = raw.split("\t")[0].trim();
+    if (!first) continue;
+    if (/^name$/i.test(first)) continue;
+    const head = first.replace(/:$/, "").trim();
+    if (first.endsWith(":") || GROUP_WORDS.test(head)) { cur = { name: head, people: [] }; groups.push(cur); continue; }
+    const n = cleanName(first);
+    if (!n) continue;
+    if (!cur) { cur = { name: "Young Men", people: [] }; groups.push(cur); }
+    if (!cur.people.includes(n)) cur.people.push(n);
+  }
+  return groups.filter(g => g.people.length);
+}
+function namesToText() { return state.groups.map(g => g.name + "\n" + g.people.join("\n")).join("\n\n"); }
+
+// ---------- Rendering ----------
+function show(view) {
+  for (const v of ["main", "setup", "restore", "copyPanel"]) $(v).hidden = v !== view;
+}
+function render() {
+  const groupsEl = $("groups");
+  groupsEl.replaceChildren();
+  for (const g of state.groups) {
+    const sec = document.createElement("section");
+    const h = document.createElement("h2");
+    const done = g.people.filter(p => state.choices[slug(p)]).length;
+    const a = document.createElement("span"); a.textContent = g.name;
+    const b = document.createElement("span"); b.textContent = `${done} of ${g.people.length} chosen`;
+    h.append(a, b);
+    const roster = document.createElement("div"); roster.className = "roster";
+    for (const name of g.people) {
+      const key = slug(name);
+      const c = state.choices[key];
+      const row = document.createElement("div"); row.className = "row";
+      const n = document.createElement("div"); n.className = "name"; n.textContent = name;
+      if (c) { const sm = document.createElement("small"); sm.textContent = "Chose " + fmt(c.updatedAt); n.appendChild(sm); }
+      const ch = document.createElement("div"); ch.className = "choices";
+      for (const inv of INVITES) {
+        const btn = document.createElement("button");
+        btn.type = "button"; btn.className = "choice " + inv.cls; btn.textContent = inv.label;
+        btn.setAttribute("aria-pressed", c && c.invitation === inv.id ? "true" : "false");
+        btn.addEventListener("click", () => pick(name, inv.id));
+        ch.appendChild(btn);
+      }
+      row.append(n, ch);
+      roster.appendChild(row);
+    }
+    sec.append(h, roster);
+    groupsEl.appendChild(sec);
+  }
+  const tally = $("tally");
+  tally.replaceChildren();
+  const people = allPeople();
+  for (const inv of INVITES) {
+    const who = people.filter(p => state.choices[slug(p)]?.invitation === inv.id);
+    const t = document.createElement("div"); t.className = "tile " + inv.cls;
+    const num = document.createElement("div"); num.className = "n"; num.textContent = who.length;
+    const l = document.createElement("div"); l.className = "l"; l.textContent = inv.label;
+    const w = document.createElement("div"); w.className = "who"; w.textContent = who.length ? who.join(", ") : "No one yet";
+    t.append(num, l, w);
+    tally.appendChild(t);
+  }
+}
+
+function pick(name, invId) {
+  const key = slug(name);
+  if (state.choices[key]?.invitation === invId) {
+    delete state.choices[key];
+    if (save()) setStatus(`Cleared ${name}'s choice.`);
+  } else {
+    state.choices[key] = { invitation: invId, updatedAt: new Date().toISOString() };
+    if (save()) setStatus(`Saved: ${name} chose “${INVITES.find(i => i.id === invId).label}”.`);
+  }
+  render();
+}
+
+// ---------- Summary / backup ----------
+function summaryText() {
+  const d = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  const lines = [`Young Men Invitations (${d})`, ""];
+  for (const inv of INVITES) {
+    const who = allPeople().filter(p => state.choices[slug(p)]?.invitation === inv.id);
+    lines.push(`${inv.label} (${who.length}): ${who.join(", ") || "none"}`);
+  }
+  for (const g of state.groups) {
+    lines.push("", g.name + ":");
+    for (const p of g.people) {
+      const c = state.choices[slug(p)];
+      const inv = c && INVITES.find(i => i.id === c.invitation);
+      lines.push(`- ${p}: ${inv ? inv.label : "not chosen"}${c ? ` (${c.updatedAt.slice(0, 10)})` : ""}`);
+    }
+  }
+  return lines.join("\n");
+}
+function parseSummary(text) {
+  const groups = []; const choices = {}; let cur = null; let inRoster = false;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const person = line.match(/^-\s+(.+?):\s+(.+?)(?:\s+\((\d{4}-\d{2}-\d{2})\))?$/);
+    if (person && cur) {
+      const [, name, label, date] = person;
+      cur.people.push(name);
+      const inv = INVITES.find(i => i.label.toLowerCase() === label.toLowerCase());
+      if (inv) choices[slug(name)] = { invitation: inv.id, updatedAt: date ? new Date(date + "T12:00:00").toISOString() : new Date().toISOString() };
+      continue;
+    }
+    const grp = line.match(/^([^:()]+):$/);
+    if (grp) { cur = { name: grp[1].trim(), people: [] }; groups.push(cur); inRoster = true; }
+  }
+  return inRoster ? { groups: groups.filter(g => g.people.length), choices } : null;
+}
+
+async function copySummary() {
+  const text = summaryText();
+  try {
+    await navigator.clipboard.writeText(text);
+    setStatus("Summary copied. Paste it into Notes or a message to keep a backup.");
+  } catch {
+    $("copyText").value = text;
+    show("copyPanel");
+    $("copyText").focus(); $("copyText").select();
+  }
+}
+
+// ---------- Wire up ----------
+$("copyBtn").addEventListener("click", copySummary);
+$("closeCopy").addEventListener("click", () => show("main"));
+$("editBtn").addEventListener("click", () => {
+  $("setupTitle").textContent = "Edit names";
+  $("namesInput").value = namesToText();
+  $("cancelNames").hidden = false;
+  show("setup");
+});
+$("cancelNames").addEventListener("click", () => show("main"));
+$("saveNames").addEventListener("click", () => {
+  const groups = parseNames($("namesInput").value);
+  if (!groups.length) { setStatus("Add at least one name, one per line.", true); return; }
+  state.groups = groups;
+  const keep = new Set(allPeople().map(slug));
+  for (const k of Object.keys(state.choices)) if (!keep.has(k)) delete state.choices[k];
+  if (save()) setStatus(`Saved ${allPeople().length} names.`);
+  render(); show("main");
+});
+$("restoreBtn").addEventListener("click", () => { $("restoreInput").value = ""; show("restore"); });
+$("cancelRestore").addEventListener("click", () => show(state.groups.length ? "main" : "setup"));
+$("doRestore").addEventListener("click", () => {
+  const parsed = parseSummary($("restoreInput").value);
+  if (!parsed || !parsed.groups.length) { setStatus("That doesn't look like a copied summary. Paste the whole text from “Copy summary”.", true); return; }
+  state = parsed;
+  if (save()) setStatus(`Restored ${allPeople().length} names and ${Object.keys(state.choices).length} choices.`);
+  render(); show("main");
+});
+
+load();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if (!storageOk) setStatus("This browser won't let the page save. Private browsing may be on.", true);
+if (state.groups.length) { render(); show("main"); }
+else { show("setup"); }
+// Offer restore on first run too
+if (!state.groups.length) {
+  const link = document.createElement("button");
+  link.className = "btn"; link.type = "button"; link.textContent = "Restore from backup";
+  link.addEventListener("click", () => { $("restoreInput").value = ""; show("restore"); });
+  document.querySelector("#setup .toolbar").appendChild(link);
+}
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
